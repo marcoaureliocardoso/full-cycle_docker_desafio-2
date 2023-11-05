@@ -125,3 +125,7 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Ignore ./mysql directory files but not the directory itself
+mysql_data/*
+!mysql_data/.gitkeep

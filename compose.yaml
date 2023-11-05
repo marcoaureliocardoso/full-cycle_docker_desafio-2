@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  mysql:
+    build:
+      context: .
+      dockerfile: .docker/mysql.Dockerfile
+    image: marcoaureliocardoso/desafio2-mysql
+    container_name: desafio2-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD_FILE: /run/secrets/mysql_root_password
+      MYSQL_DATABASE: desafio2db
+      MYSQL_USER_FILE: /run/secrets/mysql_user
+      MYSQL_PASSWORD_FILE: /run/secrets/mysql_password
+    networks:
+      - desafio2net
+    # ports:
+    #   - 3306:3306
+    volumes:
+      - ./mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "/usr/local/bin/healthcheck.sh"]
+      interval: 10s
+      timeout: 10s
+      retries: 6
+      start_period: 30s
+
+  node:
+    build:
+      context: .
+      dockerfile: .docker/node.Dockerfile
+    image: marcoaureliocardoso/desafio2-node
+    container_name: desafio2-node
+    restart: unless-stopped
+    networks:
+      - desafio2net
+    # ports:
+    #   - 3000:3000
+    volumes:
+      - ./node:/app
+    working_dir: /app
+    command: npm start
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  nginx:
+    build:
+      context: .
+      dockerfile: .docker/nginx.Dockerfile
+    image: marcoaureliocardoso/desafio2-nginx
+    container_name: desafio2-nginx
+    restart: unless-stopped
+    networks:
+      - desafio2net
+    ports:
+      - 8080:80
+    volumes:
+      - ./nginx:/etc/nginx/conf.d
+    depends_on:
+      - node
+
+networks:
+  desafio2net:
+    name: desafio2net
+    driver: bridge
