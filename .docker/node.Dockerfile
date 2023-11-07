@@ -13,6 +13,8 @@ WORKDIR /app
 COPY ./node/index.js /app/index.js
 COPY ./node/package.json /app/package.json
 
+RUN npm install
+
 EXPOSE 3000
 ENTRYPOINT [ "/usr/bin/wait-for", "mysql:3306", "--", "docker-entrypoint.sh" ]
-CMD [ "node" ]
+CMD [ "npm", "start" ]
