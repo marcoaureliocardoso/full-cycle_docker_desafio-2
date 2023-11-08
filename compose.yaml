@@ -37,6 +37,8 @@ services:
       - desafio2net
     # ports:
     #   - 3000:3000
+    volumes:
+      - ./node:/app
     depends_on:
       mysql:
         condition: service_healthy

@@ -1,7 +1,10 @@
 FROM node:20.9-alpine
 
-COPY ./tools/wait-for /usr/bin/wait-for
-RUN chmod +x /usr/bin/wait-for
+COPY ./tools/wait-for /usr/local/bin/wait-for
+RUN chmod +x /usr/local/bin/wait-for
+
+COPY ./.docker/node-entrypoint.sh /usr/local/bin/node-entrypoint.sh
+RUN chmod +x /usr/local/bin/node-entrypoint.sh
 
 RUN mkdir -p /run/secrets
 COPY ./mysql/mysql_user /run/secrets/mysql_user
@@ -10,11 +13,7 @@ RUN chmod +r /run/secrets/mysql_user && \
     chmod +r /run/secrets/mysql_password
 
 WORKDIR /app
-COPY ./node/index.js /app/index.js
-COPY ./node/package.json /app/package.json
-
-RUN npm install
 
 EXPOSE 3000
-ENTRYPOINT [ "/usr/bin/wait-for", "mysql:3306", "--", "docker-entrypoint.sh" ]
-CMD [ "npm", "start" ]
+
+ENTRYPOINT [ "/usr/local/bin/node-entrypoint.sh" ]
